@@ -321,6 +321,8 @@ def mode( color ):
         return 256
     elif color.isdigit() and (0 <= int(color) and int(color) <= 255) :
         return 256
+    elif ';' in color:
+        return 256
     else:
         raise UnknownColor(color)
 
@@ -512,6 +514,8 @@ def colorin(text, color="red", style="normal"):
     # Convert the style code
     if style == "random" or style == "Random":
         style = random.choice(list(context["styles"].keys()))
+    elif style == "omit":
+        return '';
     else:
         if style in context["styles"]:
             style_code = str(context["styles"][style])
@@ -525,6 +529,9 @@ def colorin(text, color="red", style="normal"):
             return text
         else:
             return "<none>"+text+"</none>"
+
+    elif ';' in color:
+        color_code = color
 
     elif color.lower() == "random":
         color_code = color_random( color )
@@ -574,7 +581,14 @@ def colorin(text, color="red", style="normal"):
 
     if color_code is not None:
         if not debug:
-            return start + style_code + endmarks[m] + color_code + "m" + text + stop
+            result = start
+            if style_code is not None:
+                result += style_code
+            if ';' not in color_code:
+                result += endmarks[m] + color_code
+            else:
+                result += color_code
+            return result + "m" + text + stop
         else:
             return start + style_code + endmarks[m] + color_code + "m" \
                     + "<color name=" + str(color) + " code=" + color_code \
